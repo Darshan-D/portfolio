@@ -1,0 +1,685 @@
+/* =========================================
+   1. GLOBAL VARIABLES & RESET
+   ========================================= */
+:root {
+  /* Landing Constants */
+  --landing-bg: #0a0a0c;
+  --text-primary: #f5f5f7;
+  --text-secondary: #86868b;
+  --accent: #2997ff;
+  
+  /* iOS Constants */
+  --bg-color: #000;
+  --text-color: #fff;
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --app-bg: #1c1c1e;
+  /* Boot/collapse duration. script.js reads this - keep them in sync via CSS only. */
+  --boot-duration: 800ms;
+  --ios-blue: #0b84fe;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--landing-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Added dynamically via JS to lock the background when the phone expands */
+body.locked {
+  overflow: hidden;
+}
+
+/* =========================================
+   2. LANDING PAGE WRAPPER
+   ========================================= */
+.landing-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 40px 20px 0;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  color: var(--text-primary);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.landing-text-wrapper.fade-out {
+  opacity: 0;
+  transform: translateY(-40px);
+  pointer-events: none;
+  height: 0;
+  padding: 0;
+  margin: 0;
+  gap: 0;
+}
+
+.divider {
+  width: 100%;
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #333, transparent);
+  margin: 15px 0;
+}
+
+h1.greeting {
+  font-size: 2.5rem;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+}
+
+h2.role {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.stats {
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+.links { display: flex; gap: 20px; }
+.links a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+.links a:hover { color: var(--accent); }
+
+.instruction { font-size: 1.1rem; color: var(--text-primary); margin-top: 10px; }
+.tap-hint { font-size: 0.9rem; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; }
+.story-hint { font-size: 0.8rem; color: var(--text-secondary); margin-top: -5px; }
+
+.scroll-arrow {
+  margin-top: 15px; font-size: 1.2rem; color: var(--text-secondary);
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(8px); }
+  60% { transform: translateY(4px); }
+}
+
+/* =========================================
+   3. THE DEVICE FRAME & ANIMATION
+   ========================================= */
+.mini-iphone {
+  width: 320px;
+  height: 650px;
+  border-radius: 40px;
+  border: 10px solid #222; 
+  background-color: #000;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
+  position: relative;
+  cursor: pointer;
+  transition: all var(--boot-duration) cubic-bezier(0.25, 1, 0.5, 1);
+  margin: 20px 0;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  container-type: inline-size;
+  container-name: iphone;
+}
+
+.mini-iphone::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 25px;
+  background-color: #111;
+  border-radius: 20px;
+  z-index: 100;
+}
+
+.mini-iphone:hover:not(.booted) {
+  transform: scale(1.02);
+  box-shadow: 0 0 35px rgba(255, 255, 255, 0.15);
+  border-color: #444;
+}
+
+/* BOOTED FULL-SCREEN STATE */
+.mini-iphone.booted {
+  width: 100vw;
+  max-width: 430px;
+  height: 100vh;  /* Fallback for older browsers */
+  height: 100dvh; /* Adapts to dynamic mobile address bars */
+  max-height: 932px;
+  border-radius: 0;
+  border-width: 0;
+  margin: 0;
+  transform: scale(1);
+  box-shadow: 0 0 50px rgba(0,0,0,0.5);
+  cursor: default;
+}
+
+/* Desktop Polish: Keeps the phone shape instead of stretching completely */
+@media (min-width: 431px) {
+  .mini-iphone.booted {
+    border-radius: 40px;
+    border-width: 10px;
+    height: 90vh;
+    height: 90dvh;
+    margin: 20px 0;
+  }
+}
+
+.screen-glare {
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: linear-gradient(to bottom right, rgba(255,255,255,0.05) 0%, transparent 40%, transparent 100%);
+  transform: rotate(30deg);
+  pointer-events: none; 
+  z-index: 99;
+  transition: opacity 0.6s ease;
+}
+
+/* =========================================
+   4. IOS PORTFOLIO CONTAINER (SCOPED)
+   ========================================= */
+.ios-container {
+  width: 100%;
+  height: 100%;
+  background: url('assets/wallpaper.webp') center/cover no-repeat;
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+  /* Blur/dim interactions until booted */
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+  opacity: 0.85; 
+}
+
+.mini-iphone.booted .ios-container {
+  pointer-events: all;
+  opacity: 1;
+}
+
+.status-bar {
+  display: flex; justify-content: space-between;
+  padding: 14px 24px 0; color: white;
+  font-size: 14px; font-weight: 600; z-index: 10;
+}
+
+.home-indicator {
+  width: 130px; height: 5px; background-color: #fff;
+  border-radius: 3px; margin: 10px auto 20px; cursor: pointer;
+}
+
+.widgets-row {
+  display: flex; justify-content: space-between;
+  padding: 20px 24px 10px; gap: 16px;
+}
+
+.widget {
+  flex: 1; aspect-ratio: 1 / 1; border-radius: 22px;
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); overflow: hidden;
+}
+
+@keyframes slowGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+.clock-widget {
+  background: linear-gradient(135deg, rgba(44, 44, 46, 0.85) 0%, rgba(28, 28, 30, 0.95) 100%);
+  background-size: 200% 200%;
+  animation: slowGradient 8s ease infinite;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 18px;
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05), 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.clock-city {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.2px;
+}
+
+.clock-time-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.widget-time {
+  font-size: 42px;
+  font-weight: 400; /* Lighter weight for massive numbers */
+  color: white;
+  line-height: 1;
+  letter-spacing: -1.5px;
+  margin-left: -2px; /* Optical alignment trick so the numbers sit flush left */
+}
+
+.blink {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+.widget-date {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.65); /* Dimmed slightly for contrast */
+  margin-top: 4px;
+  letter-spacing: -0.1px;
+}
+
+.notes-widget { background: rgba(255, 228, 133, 0.85); padding: 16px; display: flex; flex-direction: column; }
+.notes-header { font-size: 14px; font-weight: 600; color: #cca43b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.notes-body { font-size: 18px; font-weight: 500; color: #333; line-height: 1.3; }
+
+.widget-row-wide { padding: 0 24px 10px; }
+.profile-widget {
+  display: flex; align-items: center; background: rgba(20, 20, 20, 0.55);
+  border-radius: 22px; backdrop-filter: blur(20px); border: 1px solid var(--glass-border);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); padding: 20px 24px; cursor: pointer; transition: transform 0.2s ease; width: 100%;
+}
+.profile-widget:active { transform: scale(0.96); }
+.profile-widget-avatar {
+  font-size: 36px; width: 70px; height: 70px; background: linear-gradient(135deg, var(--ios-blue) 0%, #003380 100%);
+  border-radius: 50%; display: flex; justify-content: center; align-items: center;
+  margin-right: 20px; flex-shrink: 0; border: 2px solid rgba(255, 255, 255, 0.15); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.profile-widget-info { display: flex; flex-direction: column; justify-content: center; flex-grow: 1; }
+.profile-widget-action { color: rgba(255, 255, 255, 0.3); display: flex; align-items: center; justify-content: center; margin-left: 12px; transition: color 0.2s ease; }
+.profile-widget:active .profile-widget-action { color: rgba(255, 255, 255, 0.8); }
+.profile-widget-info h2 { font-size: 22px !important; color: white; margin: 0 0 2px 0 !important; font-weight: 600; letter-spacing: -0.5px; }
+.profile-widget-info h4 { font-size: 15px; color: rgba(255, 255, 255, 0.85); font-weight: 400; margin-bottom: 8px; }
+.yoe-badge { display: inline-flex; background: rgba(255, 255, 255, 0.15); color: white; font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px; align-self: flex-start; }
+
+.home-screen { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px 15px; padding: 10px 20px 30px; }
+.app-icon { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.2s ease; }
+.app-icon:active { transform: scale(0.9); }
+.icon { width: 60px; height: 60px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.app-name { color: white; font-size: 12px; margin-top: 6px; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
+
+.skills-bg { background: linear-gradient(180deg, #cfd9df 0%, #e2ebf0 100%); }
+.exp-bg { background: linear-gradient(180deg, #fbc2eb 0%, #a6c1ee 100%); }
+.proj-bg { background: linear-gradient(180deg, #ffecd2 0%, #fcb69f 100%); }
+.edu-bg { background: linear-gradient(180deg, #84fab0 0%, #8fd3f4 100%); }
+.resume-bg { background: linear-gradient(180deg, #ff9f0a 0%, #ff3b30 100%); }
+
+/* Centers the image inside the app icon background */
+.power-bg {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(180deg, #3a3a3c 0%, #1c1c1e 100%);
+}
+
+/* Scales the SVG down so it doesn't touch the edges */
+.power-bg .app-img {
+    width: 55%;
+    height: 55%;
+    object-fit: contain;
+}
+
+/* No backdrop-filter here: these icons sit inside .dock, which already blurs the wallpaper behind them. */
+.dock-bg { background: rgba(255, 255, 255, 0.25); border: 1px solid rgba(255,255,255,0.2); }
+
+.dock-container { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: center; }
+.dock { background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 12px; display: flex; gap: 15px; }
+
+.custom-icon { background: transparent; border: none; box-shadow: none; }
+.app-img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); }
+.avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+.app-window { position: absolute; top: 100%; left: 0; width: 100%; height: 100%; background-color: var(--app-bg); color: var(--text-color); transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1); z-index: 20; display: flex; flex-direction: column; }
+.app-window.active { top: 0; }
+
+/* =========================================
+   NATIVE IOS BACK BUTTON
+   ========================================= */
+.ios-back-btn {
+  /* Removed absolute positioning so it scrolls naturally */
+  background: none;
+  border: none;
+  color: var(--ios-blue);
+  font-size: 17px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  z-index: 100;
+  padding: 8px 0;
+  margin-bottom: 12px; /* Creates breathing room between the button and your Title */
+  margin-left: -8px; /* Shifts it slightly left so the chevron aligns perfectly */
+  transition: opacity 0.2s ease;
+}
+
+.ios-back-btn:active {
+  opacity: 0.5;
+}
+
+.app-content { flex: 1; padding: 60px 24px 40px; overflow-y: auto; }
+.app-content h1 {
+  font-size: clamp(24px, 8cqw, 34px);
+  font-weight: 700;
+  margin-bottom: 24px;
+  letter-spacing: -0.5px;
+}
+.app-content h2 {
+  font-size: clamp(16px, 5cqw, 20px);
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #fff;
+}
+.subtitle { font-size: 14px; color: #a1a1a6; margin-bottom: 12px; }
+
+#messagesApp .app-content { background-color: #000000; display: flex; flex-direction: column; }
+#messagesApp h1 { color: #ffffff; }
+.ios-message-bubble {
+  padding: clamp(10px, 3cqw, 14px) clamp(14px, 4cqw, 18px);
+  border-radius: 20px;
+  margin-bottom: 16px;
+  font-size: clamp(14px, 4cqw, 16px);
+  line-height: 1.4;
+  max-width: 85%;
+}
+.ios-message-bubble:nth-of-type(1) { background-color: #262628; color: #e5e5ea; border-bottom-left-radius: 4px; align-self: flex-start; }
+.ios-message-bubble:nth-of-type(2) { background-color: #0a84ff; color: #ffffff; border-bottom-right-radius: 4px; border-bottom-left-radius: 20px; align-self: flex-end; }
+.list-section { background-color: #1c1c1e; padding: 20px; border-radius: 16px; margin-top: 30px; margin-bottom: 16px; }
+.list-section h3 { color: #ffffff; margin-bottom: 12px; }
+.list-section p { font-size: 15px; line-height: 1.5; color: #d1d1d6; margin-top: 10px; }
+.list-section a { color: #64d2ff; text-decoration: none; font-weight: 500; transition: opacity 0.2s; }
+.list-section a:active { opacity: 0.6; }
+.mt-20 { margin-top: 20px; }
+.story-text { font-size: 15px; line-height: 1.6; color: #e5e5ea; margin-bottom: 12px; }
+.story-text strong { color: white; }
+
+.contact-card-content { display: flex; flex-direction: column; align-items: center; padding-top: 60px; }
+.contact-card-content .ios-back-btn { align-self: flex-start }
+.contact-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; width: 100%; }
+.contact-avatar { width: 90px; height: 90px; background: linear-gradient(180deg, #9ca3af 0%, #6b7280 100%); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 42px; color: white; font-weight: 500; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.contact-header h2 { font-size: 26px; font-weight: 400; color: white; margin: 0; text-align: center; }
+/* No backdrop-filter: the backdrop here is the opaque --app-bg. */
+.contact-list { width: 100%; background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 0 16px; }
+.contact-item { display: flex; flex-direction: column; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
+.contact-item:last-child { border-bottom: none; }
+.contact-label { font-size: 13px; color: var(--ios-blue); margin-bottom: 4px; text-transform: lowercase; }
+.contact-value { font-size: 16px; color: white; text-decoration: none; line-height: 1.2; }
+
+.settings-layout { background-color: #000000; padding: 60px 0 40px; }
+.settings-layout h1 { padding-left: 20px; margin-bottom: 24px; }
+.settings-layout .ios-back-btn { margin-left: 12px; }
+.settings-group-title { font-size: 13px; color: #8e8e93; margin-left: 20px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: -0.08px; }
+.settings-group { background-color: #1c1c1e; border-radius: 12px; margin: 0 20px 24px; overflow: hidden; }
+.settings-row { display: flex; align-items: center; padding: 10px 16px; position: relative; cursor: default; transition: background-color 0.2s ease; }
+.settings-row:active { background-color: #2c2c2e; }
+.settings-row:not(:last-child)::after { content: ''; position: absolute; bottom: 0; left: 60px; right: 0; height: 1px; background-color: rgba(255, 255, 255, 0.1); }
+.settings-icon { width: 30px; height: 30px; border-radius: 7px; display: flex; justify-content: center; align-items: center; font-size: 16px; color: white; margin-right: 16px; flex-shrink: 0; }
+.settings-label { flex-grow: 1; font-size: 17px; color: white; font-weight: 400; letter-spacing: -0.4px; }
+.settings-chevron { color: #5c5c5e; font-size: 20px; font-weight: 400; padding-left: 10px; }
+
+.lang-swift { background-color: #ff3b30; }
+.lang-other { background-color: #ff9f0a; }
+.tool-xcode { background-color: #0a84ff; }
+.tool-ui { background-color: #30d158; }
+.tool-test { background-color: #bf5af2; }
+.tool-jira { background-color: #5e5ce6; }
+.arch-patterns { background-color: #ff375f; }
+.arch-sdui { background-color: #64d2ff; }
+.arch-api { background-color: #32ade6; }
+.ai-tools { background-color: #000000; border: 1px solid rgba(255,255,255,0.2); }
+
+.maps-layout {
+  padding: 60px 24px 40px;
+}
+.timeline-container { margin-top: 10px; }
+.timeline-header h2 { font-size: 24px; font-weight: 700; margin-bottom: 4px; color: white; }
+.timeline-header .subtitle { color: #8e8e93; font-size: 15px; margin-bottom: 30px; letter-spacing: -0.2px; }
+.timeline { position: relative; padding-left: 28px; }
+.timeline::before {
+  content: ''; position: absolute; top: 6px; bottom: 20px; left: 8px; width: 3px;
+  background: linear-gradient(180deg, var(--ios-blue) 0%, #bf5af2 50%, #30d158 100%);
+  border-radius: 2px;
+}
+.timeline-node { position: relative; margin-bottom: 28px; }
+.node-dot {
+  position: absolute; left: -28px; top: 12px; width: 19px; height: 19px;
+  background-color: var(--app-bg); border: 4px solid var(--ios-blue);
+  border-radius: 50%; box-shadow: 0 0 10px rgba(11, 132, 254, 0.6); z-index: 2;
+}
+.timeline-node:nth-child(2) .node-dot { border-color: #5e5ce6; box-shadow: 0 0 10px rgba(94, 92, 230, 0.6); }
+.timeline-node:nth-child(3) .node-dot { border-color: #bf5af2; box-shadow: 0 0 10px rgba(191, 90, 242, 0.6); }
+.timeline-node:nth-child(4) .node-dot { border-color: #ff375f; box-shadow: 0 0 10px rgba(255, 55, 95, 0.6); }
+.timeline-node:nth-child(5) .node-dot { border-color: #ff9f0a; box-shadow: 0 0 10px rgba(255, 159, 10, 0.6); }
+.timeline-node:nth-child(6) .node-dot { border-color: #30d158; box-shadow: 0 0 10px rgba(48, 209, 88, 0.6); }
+.timeline-node .node-content.ios-message-bubble {
+  background-color: #2c2c2e; color: #f2f2f7; border-radius: 18px; border-top-left-radius: 4px;
+  padding: 16px 18px; max-width: 100%; margin-bottom: 0; font-size: 15px; line-height: 1.5;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.timeline-node .node-content.ios-message-bubble strong { color: white; font-size: 16px; display: block; margin-bottom: 4px; }
+
+.app-content.no-scroll { overflow: hidden; display: flex; flex-direction: column; }
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  flex: 1;
+  min-height: 0; /* lets the grid shrink below its content height so overflow can scroll */
+  padding-bottom: 20px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.bento-grid::-webkit-scrollbar { display: none; }
+/* An expanded card is positioned against .app-content, so the grid must stop clipping it */
+.bento-grid.card-open { overflow: visible; }
+.today-card { border-radius: 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer; position: relative; overflow: hidden; background: #1c1c1e; }
+.today-card:active:not(.expanded) { transform: scale(0.96); }
+.today-card.rect { grid-column: span 2; }
+.today-card.square { grid-column: span 1; }
+.today-card-cover { padding: 16px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; background-size: cover; background-position: center; }
+.today-card-subtitle { font-size: 12px; font-weight: 600; text-transform: uppercase; color: rgba(255, 255, 255, 0.85); letter-spacing: 0.5px; margin-bottom: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+.today-card.rect .today-card-title {
+  font-size: clamp(18px, 6cqw, 24px);
+  font-weight: 700;
+  color: white;
+  line-height: 1.1;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.today-card.square .today-card-title {
+  font-size: clamp(14px, 4.5cqw, 18px);
+  font-weight: 700;
+  color: white;
+  line-height: 1.1;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.today-card-content { max-height: 0; opacity: 0; transition: all 0.4s ease; overflow: hidden; background: #1c1c1e; }
+.today-card.expanded { position: absolute; top: 0; left: 0; width: 100%; height: 100%; margin: 0; border-radius: 0; z-index: 110; display: flex; flex-direction: column; cursor: default; overflow-y: auto; grid-column: span 2; }
+.today-card.expanded .today-card-cover { height: 350px; flex-shrink: 0; padding: 24px; }
+.today-card.expanded .today-card-title { font-size: 28px; }
+.today-card.expanded .today-card-content { padding: 24px 24px 80px; max-height: 5000px; opacity: 1; overflow: visible; }
+.close-card-btn { position: absolute; top: 24px; right: 24px; width: 32px; height: 32px; border-radius: 16px; background: rgba(0, 0, 0, 0.5); color: white; border: none; font-size: 16px; display: none; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(10px); z-index: 40; }
+.today-card.expanded .close-card-btn { display: flex; }
+
+.tech-pills { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { background: rgba(255, 255, 255, 0.15); color: white; padding: 6px 14px; border-radius: 14px; font-size: 13px; font-weight: 500; }
+
+.proj-1 { background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%), url('assets/projects/bms/bms-title.webp') center/cover no-repeat; }
+.proj-2 { background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%), url('assets/projects/network/network-title.webp') center/cover no-repeat; }
+.proj-3 { background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%), url('assets/projects/cred/cred-title.webp') center/cover no-repeat; }
+.proj-4 { background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%), url('assets/projects/trip/trip-title.webp') center/cover no-repeat; }
+
+.screenshot-gallery { display: flex; gap: 16px; overflow-x: auto; padding: 20px 0; margin-top: 10px; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; }
+.screenshot-gallery::-webkit-scrollbar { display: none; }
+.app-screenshot { width: 220px; height: 476px; border-radius: 16px; object-fit: cover; flex-shrink: 0; scroll-snap-align: center; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); }
+
+.action-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0 16px 0;
+}
+.app-store-btn, .medium-store-btn { font-size: 13px; font-weight: 600; text-transform: uppercase; text-decoration: none; letter-spacing: 0.3px; padding: 6px 16px; border-radius: 14px; display: inline-flex; justify-content: center; align-items: center; transition: transform 0.15s ease, opacity 0.15s ease; border: none; }
+.app-store-btn { background-color: var(--ios-blue); color: #ffffff; box-shadow: 0 2px 6px rgba(11, 132, 254, 0.25); }
+.medium-store-btn { background-color: #ff3b30; color: #ffffff; box-shadow: 0 2px 6px rgba(255, 59, 48, 0.25); }
+.app-store-btn:active, .medium-store-btn:active { transform: scale(0.95); opacity: 0.75; }
+
+.wallet-layout { padding: 60px 24px 40px; }
+.wallet-pass-container { display: flex; flex-direction: column; position: relative; margin-top: 10px; }
+.wallet-pass { border-radius: 18px; padding: 24px; color: white; box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4); position: relative; }
+.edu-pass { background: radial-gradient(circle at top left, #0a84ff 0%, #003380 100%); z-index: 3; }
+.interests-pass { background: radial-gradient(circle at top right, #ff9f0a 0%, #804000 100%); z-index: 2; margin-top: 20px; }
+.pass-header { display: flex; align-items: center; margin-bottom: 30px; }
+.university-logo { width: 42px; height: 42px; background: rgba(255, 255, 255, 0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; margin-right: 14px; flex-shrink: 0; }
+.pass-header h2 { font-size: 18px !important; font-weight: 600; margin: 0 !important; line-height: 1.2; }
+.pass-row { margin-bottom: 24px; }
+.pass-row.split { display: flex; justify-content: space-between; }
+.pass-col.right { text-align: right; }
+.pass-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255, 255, 255, 0.6); margin-bottom: 6px; font-weight: 600; }
+.pass-value { font-size: 17px; font-weight: 500; letter-spacing: -0.3px; }
+.interests-pass .pass-body .story-text { margin-top: 10px; color: rgba(255, 255, 255, 0.95); font-size: 16px; }
+
+/* =========================================
+   APPLE BOOT SCREEN OVERLAY
+   ========================================= */
+.apple-boot-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+  transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.boot-apple-logo {
+  width: 65px;
+  height: 65px;
+  object-fit: contain;
+  display: block;
+  animation: bootPulse 2s infinite ease-in-out;
+}
+
+@keyframes bootPulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.mini-iphone.booted .apple-boot-screen {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* =========================================
+   LANDING SUB-HEADER DETAILS
+   ========================================= */
+.landing-details {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-top: -4px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.landing-details a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.landing-details a:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* Retaining the clean 2x2 layout for the 4 core social links on mobile */
+@media (max-width: 480px) {
+  .landing-text-wrapper .links {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 24px;
+    justify-items: center;
+  }
+}
+
+/* =========================================
+   QUICK LINKS (FROSTED PILLS)
+   ========================================= */
+.quick-links-container {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+  justify-content: center;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.08); /* Deep frosted glass */
+  /* No backdrop-filter: these sit on the flat --landing-bg, so a blur of a
+     flat colour is that same flat colour - it cost GPU and rendered nothing. */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+  padding: 8px 18px;
+  border-radius: 20px; /* Perfect pill shape */
+  font-size: 13px;
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.3px;
+}
+
+.glass-pill:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05); /* Subtle hardware tactile bump */
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Class to smoothly hide the pills when the phone boots */
+.quick-links-container.fade-out {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Collapses the bottom divider when the phone is booted */
+body.locked .divider {
+  opacity: 0;
+  height: 0;
+  margin: 0;
+  border: none;
+}

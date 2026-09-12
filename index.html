@@ -36,6 +36,11 @@
 
     <link rel="stylesheet" href="style.css">
 
+    <!-- GoatCounter: cookieless, no consent banner needed.
+         Dashboard: https://dodiadarshan7.goatcounter.com -->
+    <script data-goatcounter="https://dodiadarshan7.goatcounter.com/count"
+            async src="https://gc.zgo.at/count.js"></script>
+
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -69,7 +74,7 @@
         </p>
         
         <div class="links">
-            <a href="https://drive.google.com/drive/folders/1jWWhEABtpIl_d0xjDAsFmWknEvp9LHrI?usp=drive_link" target="_blank" rel="noopener noreferrer">[ Resume ]</a>
+            <a href="Darshan-Dodia-Resume.pdf" target="_blank" rel="noopener noreferrer">[ Resume ]</a>
             <a href="https://www.linkedin.com/in/darshan-dodia/" target="_blank" rel="noopener noreferrer">[ LinkedIn ]</a>
             <a href="https://github.com/Darshan-D" target="_blank" rel="noopener noreferrer">[ GitHub ]</a>
             <a href="https://medium.com/@darshandodia" target="_blank" rel="noopener noreferrer">[  Medium  ]</a>
@@ -87,6 +92,7 @@
         <div class="screen-glare" id="glare"></div>
         <div class="apple-boot-screen" id="boot-screen">
             <img src="assets/icons/apple-icon.svg" alt="Apple Logo" class="boot-apple-logo">
+            <span class="boot-tap-hint">tap</span>
         </div>
         <div class="ios-container">
             <div class="status-bar">
@@ -114,7 +120,7 @@
             </div>
             
             <div class="widget-row-wide">
-                <div class="profile-widget" onclick="window.open('https://medium.com/@darshandodia', '_blank')">
+                <div class="profile-widget" onclick="openExternal('https://medium.com/@darshandodia', 'medium')">
                     <div class="profile-widget-avatar">
                         <img src="assets/profile-photo.webp" alt="Darshan Dodia" class="avatar-img" width="320" height="320" decoding="async">
                     </div>
@@ -150,17 +156,17 @@
                     <div class="icon edu-bg">🎓</div>
                     <div class="app-name">Education</div>
                 </div>
-                <div class="app-icon" onclick="window.open('https://drive.google.com/drive/folders/1jWWhEABtpIl_d0xjDAsFmWknEvp9LHrI?usp=drive_link', '_blank')">
+                <div class="app-icon" onclick="openExternal('Darshan-Dodia-Resume.pdf', 'resume')">
                     <div class="icon resume-bg">📄</div>
                     <div class="app-name">Resume</div>
                 </div>
-                <div class="app-icon" onclick="window.open('https://github.com/Darshan-D', '_blank')">
+                <div class="app-icon" onclick="openExternal('https://github.com/Darshan-D', 'github/profile')">
                     <div class="icon custom-icon">
                         <img src="assets/icons/github-icon.svg" alt="GitHub" class="app-img">
                     </div>
                     <div class="app-name">Github</div>
                 </div>
-                <div class="app-icon" onclick="window.open('https://www.linkedin.com/in/darshan-dodia/', '_blank')">
+                <div class="app-icon" onclick="openExternal('https://www.linkedin.com/in/darshan-dodia/', 'linkedin')">
                     <div class="icon custom-icon">
                         <img src="assets/icons/linkedin-icon.svg" alt="LinkedIn" class="app-img">
                     </div>
@@ -182,10 +188,10 @@
                     <div class="app-icon" onclick="openApp('messagesApp')">
                         <div class="icon dock-bg">💬</div>
                     </div>
-                    <div class="app-icon" onclick="window.location.href='mailto:dodiadarshan7@gmail.com'">
+                    <div class="app-icon" onclick="openExternal('mailto:dodiadarshan7@gmail.com', 'email')">
                         <div class="icon dock-bg">✉️</div>
                     </div>
-                    <div class="app-icon" onclick="window.open('https://medium.com/@darshandodia', '_blank')">
+                    <div class="app-icon" onclick="openExternal('https://medium.com/@darshandodia', 'medium')">
                         <div class="icon dock-bg">🌐</div>
                     </div>
                 </div>
@@ -415,6 +421,53 @@
                     <h1>Darshan's App Store</h1>
                     
                     <div class="bento-grid">
+                        <div class="today-card square" onclick="expandCard(this)">
+                            <button class="close-card-btn" onclick="closeExpandedCard(event, this)">✕</button>
+                            <div class="today-card-cover proj-5">
+                                <h4 class="today-card-subtitle">Audio Engineering</h4>
+                                <h2 class="today-card-title">Harmoniq</h2>
+                            </div>
+                            <div class="today-card-content">
+                                <div class="action-row">
+                                    <a href="https://github.com/Darshan-D/Harmoniq" target="_blank" rel="noopener noreferrer" class="app-store-btn" onclick="event.stopPropagation()">Get Code</a>
+                                    <a href="https://medium.com/@darshandodia/why-doesnt-youtube-music-have-crossfade-i-built-my-own-engine-to-find-out-a1de09091328" target="_blank" rel="noopener noreferrer" class="medium-store-btn" onclick="event.stopPropagation()">Get Article</a>
+                                </div>
+                                <p class="story-text">YouTube Music still doesn't do crossfade, and I wanted to understand why it's actually hard. So I built the engine myself: two "AVAudioEngine" decks that quietly swap places mid-track, each with its own gain automation, handing off sample-accurately. Audio streams straight off disk instead of loading whole FLAC files into memory, and the spinning vinyl and tonearm lift are choreographed to the crossfade itself.</p>
+                                <div class="tech-pills">
+                                    <span class="pill">SwiftUI</span>
+                                    <span class="pill">AVAudioEngine</span>
+                                    <span class="pill">Lossless Audio</span>
+                                </div>
+                                <div class="screenshot-gallery">
+                                    <img src="assets/projects/harmoniq/harmoniq-detail.webp" alt="Harmoniq player screen with vinyl record" class="app-screenshot" width="440" height="957" loading="lazy" decoding="async" fetchpriority="low">
+                                    <img src="assets/projects/harmoniq/harmoniq-detail-2.webp" alt="Harmoniq up-next queue screen" class="app-screenshot" width="440" height="957" loading="lazy" decoding="async" fetchpriority="low">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="today-card square" onclick="expandCard(this)">
+                            <button class="close-card-btn" onclick="closeExpandedCard(event, this)">✕</button>
+                            <div class="today-card-cover proj-6">
+                                <h4 class="today-card-subtitle">Offline-First</h4>
+                                <h2 class="today-card-title">MatchMate</h2>
+                            </div>
+                            <div class="today-card-content">
+                                <div class="action-row">
+                                    <a href="https://github.com/Darshan-D/MatchMate" target="_blank" rel="noopener noreferrer" class="app-store-btn" onclick="event.stopPropagation()">Get Code</a>
+                                </div>
+                                <p class="story-text">I wanted to see how far I could push an offline-first architecture in a small app. MatchMate is a Tinder-style swipe deck where an actor-based repository is the single source of truth, broadcasting changes over an "AsyncStream" so every screen stays in sync in real time. Once a page has cached it keeps working in Airplane Mode, and SwiftData persistence runs entirely off the main thread.</p>
+                                <div class="tech-pills">
+                                    <span class="pill">SwiftUI</span>
+                                    <span class="pill">SwiftData</span>
+                                    <span class="pill">Swift Concurrency</span>
+                                </div>
+                                <div class="screenshot-gallery">
+                                    <img src="assets/projects/matchmate/matchmate-detail.webp" alt="MatchMate discover swipe deck" class="app-screenshot" width="345" height="750" loading="lazy" decoding="async" fetchpriority="low">
+                                    <img src="assets/projects/matchmate/matchmate-detail-2.webp" alt="MatchMate profile detail screen" class="app-screenshot" width="345" height="750" loading="lazy" decoding="async" fetchpriority="low">
+                                    <img src="assets/projects/matchmate/matchmate-detail-3.webp" alt="MatchMate your decisions list" class="app-screenshot" width="345" height="750" loading="lazy" decoding="async" fetchpriority="low">
+                                </div>
+                            </div>
+                        </div>
                         <div class="today-card rect" onclick="expandCard(this)">
                             <button class="close-card-btn" onclick="closeExpandedCard(event, this)">✕</button>
                             <div class="today-card-cover proj-4">

@@ -533,6 +533,8 @@ h2.role {
 .proj-2 { background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%), url('assets/projects/network/network-title.webp') center/cover no-repeat; }
 .proj-3 { background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%), url('assets/projects/cred/cred-title.webp') center/cover no-repeat; }
 .proj-4 { background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%), url('assets/projects/trip/trip-title.webp') center/cover no-repeat; }
+.proj-5 { background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%), url('assets/projects/harmoniq/harmoniq-title.webp') center/cover no-repeat; }
+.proj-6 { background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%), url('assets/projects/matchmate/matchmate-title.webp') center/cover no-repeat; }
 
 .screenshot-gallery { display: flex; gap: 16px; overflow-x: auto; padding: 20px 0; margin-top: 10px; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; }
 .screenshot-gallery::-webkit-scrollbar { display: none; }
@@ -576,8 +578,10 @@ h2.role {
   height: 100%;
   background-color: #000000;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 32px;
   z-index: 50;
   transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
@@ -587,6 +591,18 @@ h2.role {
   height: 65px;
   object-fit: contain;
   display: block;
+  animation: bootPulse 2s infinite ease-in-out;
+}
+
+/* Turns the boot screen from a "please wait" spinner into a tap affordance */
+.boot-tap-hint {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 5px;
+  text-indent: 5px; /* offsets the trailing letter-space so it stays optically centred */
+  color: #999; /* same value as the fill in apple-icon.svg */
+  text-shadow: 0 0 12px rgba(153, 153, 153, 0.35);
   animation: bootPulse 2s infinite ease-in-out;
 }
 

@@ -11,6 +11,32 @@ function bootDurationMs() {
 
 /**
  * =========================================
+ * ANALYTICS (GoatCounter)
+ * =========================================
+ * Fires custom events. Everything is wrapped in a guard: GoatCounter loads
+ * async and may be blocked by an extension, and tracking must never be able
+ * to break the site.
+ */
+function track(path, title) {
+    try {
+        if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+            window.goatcounter.count({ path: path, title: title || path, event: true });
+        }
+    } catch (e) { /* analytics is never worth an exception */ }
+}
+
+/** Opens an external destination and records which one. */
+function openExternal(url, label) {
+    track('out/' + label, 'Outbound: ' + label);
+    if (url.indexOf('mailto:') === 0) {
+        window.location.href = url;
+    } else {
+        window.open(url, '_blank');
+    }
+}
+
+/**
+ * =========================================
  * LANDING PAGE TO IOS TRANSITION
  * =========================================
  */
@@ -140,7 +166,10 @@ setInterval(updateTime, 1000);
  */
 function openApp(appId) {
     const appWindow = document.getElementById(appId);
-    if (appWindow) appWindow.classList.add('active');
+    if (appWindow) {
+        appWindow.classList.add('active');
+        track('app/' + appId.replace(/App$/, ''), 'Opened app: ' + appId);
+    }
 }
 
 function closeApp(appId) {
@@ -156,6 +185,8 @@ function expandCard(cardElement) {
         cardElement.classList.add('expanded');
         const grid = cardElement.closest('.bento-grid');
         if (grid) grid.classList.add('card-open');
+        const name = cardElement.querySelector('.today-card-title');
+        if (name) track('project/' + name.textContent.trim(), 'Project: ' + name.textContent.trim());
     }
 }
 
@@ -177,6 +208,8 @@ function launchDirectToApp(event, appId) {
     // Prevent event bubbling if necessary
     if (event) event.stopPropagation();
 
+    track('shortcut/' + appId.replace(/App$/, ''), 'Shortcut pill: ' + appId);
+
     // 1. Trigger the main boot sequence
     bootPhone();
 
@@ -194,6 +227,36 @@ function launchDirectToApp(event, appId) {
 const deviceEl = document.getElementById('device');
 if (deviceEl) {
     deviceEl.addEventListener('click', () => {
-        if (!deviceEl.classList.contains('booted')) bootPhone();
+        if (!deviceEl.classList.contains('booted')) {
+            track('boot', 'Tapped the phone');
+            bootPhone();
+        }
     });
 }
+
+/**
+ * Outbound link tracking for real <a> elements. Registered on the capture
+ * phase because the project "Get Code"/"Get Article" buttons call
+ * event.stopPropagation(), which would stop a normal bubbling listener.
+ */
+document.addEventListener('click', (e) => {
+    const link = e.target.closest && e.target.closest('a[href]');
+    if (!link) return;
+    const href = link.getAttribute('href') || '';
+    let label = null;
+
+    if (href.indexOf('mailto:') === 0) {
+        label = 'email';
+    } else if (href.indexOf('github.com') > -1) {
+        const repo = href.split('github.com/')[1];
+        label = 'github/' + (repo && repo.split('/')[1] ? repo.split('/')[1] : 'profile');
+    } else if (href.indexOf('linkedin.com') > -1) {
+        label = 'linkedin';
+    } else if (href.indexOf('medium.com') > -1) {
+        label = 'medium';
+    } else if (href.slice(-4).toLowerCase() === '.pdf') {
+        label = 'resume';
+    }
+
+    if (label) track('out/' + label, 'Outbound: ' + label);
+}, true);
